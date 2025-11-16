@@ -1,0 +1,55 @@
+{
+    "name": "julienlinard/auth-php",
+    "description": "Système d'authentification complet pour PHP avec gestion des utilisateurs, rôles, permissions et sécurité",
+    "type": "library",
+    "keywords": [
+        "auth",
+        "authentication",
+        "authorization",
+        "security",
+        "login",
+        "logout",
+        "roles",
+        "permissions",
+        "php8",
+        "middleware"
+    ],
+    "homepage": "https://github.com/julien-lin/auth-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Julien Linard",
+            "email": "julien.linard.dev@gmail.com",
+            "homepage": "https://github.com/julien-lin"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/julien-lin/auth-php/issues",
+        "source": "https://github.com/julien-lin/auth-php"
+    },
+    "require": {
+        "php": ">=8.0",
+        "julienlinard/core-php": "^1.0",
+        "julienlinard/doctrine-php": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JulienLinard\\Auth\\": "src/Auth/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JulienLinard\\Auth\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-text"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
