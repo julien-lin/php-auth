@@ -107,11 +107,16 @@ class AuthManager
         // Convertir string en constante si nécessaire
         if (is_string($algorithm)) {
             $algorithm = match(strtoupper($algorithm)) {
-                'BCRYPT', 'PASSWORD_BCRYPT' => PASSWORD_BCRYPT,
+                'BCRYPT', 'PASSWORD_BCRYPT', '2Y', '2A' => PASSWORD_BCRYPT, // '2y' et '2a' sont les préfixes bcrypt
                 'ARGON2ID', 'PASSWORD_ARGON2ID' => defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT,
                 'ARGON2I', 'PASSWORD_ARGON2I' => defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_BCRYPT,
                 default => PASSWORD_BCRYPT,
             };
+        }
+
+        // S'assurer que l'algorithme est un entier
+        if (!is_int($algorithm)) {
+            $algorithm = PASSWORD_BCRYPT;
         }
 
         return new PasswordHasher($algorithm, $options);
