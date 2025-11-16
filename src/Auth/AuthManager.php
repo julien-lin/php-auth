@@ -43,6 +43,8 @@ class AuthManager
             'identifier_field' => $config['identifier_field'] ?? 'id',
             'credential_field' => $config['credential_field'] ?? 'email',
             'hasher' => $config['hasher'] ?? null,
+            'hasher_algorithm' => $config['hasher_algorithm'] ?? null,
+            'hasher_options' => $config['hasher_options'] ?? null,
             'provider' => $config['provider'] ?? null,
         ];
     }
@@ -98,7 +100,21 @@ class AuthManager
             return $this->config['hasher'];
         }
 
-        return new PasswordHasher();
+        // Si un algorithme est spécifié dans la config, l'utiliser
+        $algorithm = $this->config['hasher_algorithm'] ?? PASSWORD_BCRYPT;
+        $options = $this->config['hasher_options'] ?? [];
+
+        // Convertir string en constante si nécessaire
+        if (is_string($algorithm)) {
+            $algorithm = match(strtoupper($algorithm)) {
+                'BCRYPT', 'PASSWORD_BCRYPT' => PASSWORD_BCRYPT,
+                'ARGON2ID', 'PASSWORD_ARGON2ID' => defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT,
+                'ARGON2I', 'PASSWORD_ARGON2I' => defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_BCRYPT,
+                default => PASSWORD_BCRYPT,
+            };
+        }
+
+        return new PasswordHasher($algorithm, $options);
     }
 
     /**
