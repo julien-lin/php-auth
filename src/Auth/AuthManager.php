@@ -101,22 +101,24 @@ class AuthManager
         }
 
         // Si un algorithme est spécifié dans la config, l'utiliser
-        $algorithm = $this->config['hasher_algorithm'] ?? PASSWORD_BCRYPT;
+        $algorithm = $this->config['hasher_algorithm'] ?? null;
         $options = $this->config['hasher_options'] ?? [];
 
         // Convertir string en constante si nécessaire
-        if (is_string($algorithm)) {
+        if ($algorithm === null) {
+            // Par défaut, utiliser PASSWORD_BCRYPT (valeur entière)
+            $algorithm = defined('PASSWORD_BCRYPT') && is_int(PASSWORD_BCRYPT) ? PASSWORD_BCRYPT : 2;
+        } elseif (is_string($algorithm)) {
+            // Convertir les strings en constantes entières
             $algorithm = match(strtoupper($algorithm)) {
-                'BCRYPT', 'PASSWORD_BCRYPT', '2Y', '2A' => PASSWORD_BCRYPT, // '2y' et '2a' sont les préfixes bcrypt
-                'ARGON2ID', 'PASSWORD_ARGON2ID' => defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT,
-                'ARGON2I', 'PASSWORD_ARGON2I' => defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_BCRYPT,
-                default => PASSWORD_BCRYPT,
+                'BCRYPT', 'PASSWORD_BCRYPT', '2Y', '2A' => (defined('PASSWORD_BCRYPT') && is_int(PASSWORD_BCRYPT)) ? PASSWORD_BCRYPT : 2,
+                'ARGON2ID', 'PASSWORD_ARGON2ID' => (defined('PASSWORD_ARGON2ID') && is_int(PASSWORD_ARGON2ID)) ? PASSWORD_ARGON2ID : 2,
+                'ARGON2I', 'PASSWORD_ARGON2I' => (defined('PASSWORD_ARGON2I') && is_int(PASSWORD_ARGON2I)) ? PASSWORD_ARGON2I : 2,
+                default => (defined('PASSWORD_BCRYPT') && is_int(PASSWORD_BCRYPT)) ? PASSWORD_BCRYPT : 2,
             };
-        }
-
-        // S'assurer que l'algorithme est un entier
-        if (!is_int($algorithm)) {
-            $algorithm = PASSWORD_BCRYPT;
+        } elseif (!is_int($algorithm)) {
+            // Si ce n'est ni null, ni string, ni int, utiliser la valeur par défaut
+            $algorithm = (defined('PASSWORD_BCRYPT') && is_int(PASSWORD_BCRYPT)) ? PASSWORD_BCRYPT : 2;
         }
 
         return new PasswordHasher($algorithm, $options);
