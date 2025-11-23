@@ -2,6 +2,10 @@
 
 [🇬🇧 Lire en anglais](README.md) | [🇫🇷 Lire en français](README.fr.md)
 
+## 💝 Soutenir le projet
+
+Si ce bundle vous est utile, envisagez de [devenir un sponsor](https://github.com/sponsors/julien-lin) pour soutenir le développement et la maintenance de ce projet open source.
+
 ---
 
 Un système d'authentification complet et moderne pour PHP 8+ avec gestion des utilisateurs, rôles, permissions, guards personnalisables et intégration avec les packages JulienLinard.
