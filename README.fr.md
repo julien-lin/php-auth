@@ -1,25 +1,25 @@
-# Auth PHP - Complete Authentication System
+# Auth PHP - Système d'Authentification Complet
 
-[🇫🇷 Read in French](README.fr.md) | [🇬🇧 Read in English](README.md)
+[🇬🇧 Lire en anglais](README.md) | [🇫🇷 Lire en français](README.fr.md)
 
 ---
 
-A complete and modern authentication system for PHP 8+ with user management, roles, permissions, customizable guards and integration with JulienLinard packages.
+Un système d'authentification complet et moderne pour PHP 8+ avec gestion des utilisateurs, rôles, permissions, guards personnalisables et intégration avec les packages JulienLinard.
 
-## 📋 Table of Contents
+## 📋 Table des matières
 
 - [Installation](#installation)
-- [Quick Start](#quick-start)
+- [Démarrage rapide](#démarrage-rapide)
 - [Configuration](#configuration)
-- [Authentication](#authentication)
-- [Roles and Permissions](#roles-and-permissions)
+- [Authentification](#authentification)
+- [Rôles et Permissions](#rôles-et-permissions)
 - [Middlewares](#middlewares)
 - [User Providers](#user-providers)
 - [Guards](#guards)
 - [Hashers](#hashers)
-- [Integration with Other Packages](#integration-with-other-packages)
+- [Intégration avec les autres packages](#intégration-avec-les-autres-packages)
 - [API Reference](#api-reference)
-- [Complete Examples](#complete-examples)
+- [Exemples complets](#exemples-complets)
 
 ## 🚀 Installation
 
@@ -27,14 +27,14 @@ A complete and modern authentication system for PHP 8+ with user management, rol
 composer require julienlinard/auth-php
 ```
 
-**Requirements**:
-- PHP 8.0 or higher
-- `julienlinard/core-php` (for Session)
-- `julienlinard/doctrine-php` (for DatabaseUserProvider)
+**Requirements** :
+- PHP 8.0 ou supérieur
+- `julienlinard/core-php` (pour Session)
+- `julienlinard/doctrine-php` (pour DatabaseUserProvider)
 
-## ⚡ Quick Start
+## ⚡ Démarrage rapide
 
-### Minimal Example
+### Exemple minimal
 
 ```php
 <?php
@@ -44,7 +44,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use JulienLinard\Auth\AuthManager;
 use JulienLinard\Doctrine\EntityManager;
 
-// Database configuration
+// Configuration de la base de données
 $dbConfig = [
     'host' => 'localhost',
     'dbname' => 'mydatabase',
@@ -54,7 +54,7 @@ $dbConfig = [
 
 $em = new EntityManager($dbConfig);
 
-// Authentication configuration
+// Configuration d'authentification
 $authConfig = [
     'user_class' => User::class,
     'entity_manager' => $em
@@ -62,7 +62,7 @@ $authConfig = [
 
 $auth = new AuthManager($authConfig);
 
-// Login attempt
+// Tentative de connexion
 $credentials = [
     'email' => 'user@example.com',
     'password' => 'password123'
@@ -70,15 +70,15 @@ $credentials = [
 
 if ($auth->attempt($credentials)) {
     $user = $auth->user();
-    echo "Welcome " . $user->firstname;
+    echo "Bienvenue " . $user->firstname;
 } else {
-    echo "Invalid credentials";
+    echo "Identifiants incorrects";
 }
 ```
 
 ## 📖 Configuration
 
-### Complete Configuration
+### Configuration complète
 
 ```php
 use JulienLinard\Auth\AuthManager;
@@ -87,46 +87,46 @@ use JulienLinard\Doctrine\EntityManager;
 $em = new EntityManager($dbConfig);
 
 $authConfig = [
-    // User entity class (required)
+    // Classe de l'entité utilisateur (requis)
     'user_class' => User::class,
     
-    // Entity Manager (required for DatabaseUserProvider)
+    // Entity Manager (requis pour DatabaseUserProvider)
     'entity_manager' => $em,
     
-    // Session key to store user (optional, default: 'auth_user')
+    // Clé de session pour stocker l'utilisateur (optionnel, défaut: 'auth_user')
     'session_key' => 'auth_user',
     
-    // Enable "remember me" (optional, default: true)
+    // Activer "remember me" (optionnel, défaut: true)
     'remember_me' => true,
     
-    // Identifier field (optional, default: 'id')
+    // Champ pour l'identifiant (optionnel, défaut: 'id')
     'identifier_field' => 'id',
     
-    // Credential field (optional, default: 'email')
+    // Champ pour les credentials (optionnel, défaut: 'email')
     'credential_field' => 'email',
     
-    // Custom hasher (optional)
+    // Hasher personnalisé (optionnel)
     'hasher' => new CustomHasher(),
     
-    // Hash algorithm (optional, default: PASSWORD_BCRYPT)
-    // Supports: 'BCRYPT', 'ARGON2ID', 'ARGON2I', or PHP constants
+    // Algorithme de hash (optionnel, défaut: PASSWORD_BCRYPT)
+    // Supporte: 'BCRYPT', 'ARGON2ID', 'ARGON2I', ou constantes PHP
     'hasher_algorithm' => 'ARGON2ID',
     
-    // Hasher options (optional)
+    // Options du hasher (optionnel)
     'hasher_options' => [
         'memory_cost' => 65536,
         'time_cost' => 4,
         'threads' => 3
     ],
     
-    // Custom provider (optional)
+    // Provider personnalisé (optionnel)
     'provider' => new CustomUserProvider()
 ];
 
 $auth = new AuthManager($authConfig);
 ```
 
-### Minimal Configuration
+### Configuration minimale
 
 ```php
 $authConfig = [
@@ -137,107 +137,107 @@ $authConfig = [
 $auth = new AuthManager($authConfig);
 ```
 
-## 🔐 Authentication
+## 🔐 Authentification
 
-### Login with Credentials
+### Login avec credentials
 
 ```php
-// Login attempt
+// Tentative de connexion
 $credentials = [
     'email' => 'user@example.com',
     'password' => 'password123'
 ];
 
 if ($auth->attempt($credentials)) {
-    // Login successful
+    // Connexion réussie
     $user = $auth->user();
-    echo "Welcome " . $user->firstname;
+    echo "Bienvenue " . $user->firstname;
 } else {
-    // Invalid credentials
-    echo "Email or password incorrect";
+    // Identifiants incorrects
+    echo "Email ou mot de passe incorrect";
 }
 ```
 
-### Login with "Remember Me"
+### Login avec "Remember Me"
 
 ```php
-// Login with "remember me" enabled
+// Connexion avec "remember me" activé
 $auth->attempt($credentials, true);
 ```
 
-### Direct Login (without password verification)
+### Login direct (sans vérification de mot de passe)
 
 ```php
 use JulienLinard\Auth\Models\UserInterface;
 
 $user = $em->getRepository(User::class)->find(1);
 
-// Authenticate user directly
+// Authentifier directement l'utilisateur
 $auth->login($user);
 
-// With "remember me"
+// Avec "remember me"
 $auth->login($user, true);
 ```
 
 ### Logout
 
 ```php
-// Logout
+// Déconnexion
 $auth->logout();
 ```
 
-### Checks
+### Vérifications
 
 ```php
-// Check if a user is authenticated
+// Vérifier si un utilisateur est authentifié
 if ($auth->check()) {
     $user = $auth->user();
-    echo "Logged in user: " . $user->email;
+    echo "Utilisateur connecté : " . $user->email;
 }
 
-// Check if no user is authenticated
+// Vérifier si aucun utilisateur n'est authentifié
 if ($auth->guest()) {
-    echo "No user logged in";
+    echo "Aucun utilisateur connecté";
 }
 
-// Get current user
-$user = $auth->user(); // Returns UserInterface|null
+// Récupérer l'utilisateur actuel
+$user = $auth->user(); // Retourne UserInterface|null
 
-// Get current user ID
-$userId = $auth->id(); // Returns int|string|null
+// Récupérer l'ID de l'utilisateur actuel
+$userId = $auth->id(); // Retourne int|string|null
 ```
 
-## 👥 Roles and Permissions
+## 👥 Rôles et Permissions
 
-### Check a Role
+### Vérifier un rôle
 
 ```php
-// Check if user has a specific role
+// Vérifier si l'utilisateur a un rôle spécifique
 if ($auth->hasRole('admin')) {
-    echo "User is administrator";
+    echo "L'utilisateur est administrateur";
 }
 
-// Check multiple roles (OR)
+// Vérifier plusieurs rôles (OR)
 if ($auth->hasRole('admin') || $auth->hasRole('moderator')) {
-    echo "User is admin or moderator";
+    echo "L'utilisateur est admin ou modérateur";
 }
 ```
 
-### Check a Permission
+### Vérifier une permission
 
 ```php
-// Check if user has a permission
+// Vérifier si l'utilisateur a une permission
 if ($auth->can('edit-posts')) {
-    echo "User can edit posts";
+    echo "L'utilisateur peut éditer des posts";
 }
 
-// Check multiple permissions (OR)
+// Vérifier plusieurs permissions (OR)
 if ($auth->can('edit-posts') || $auth->can('delete-posts')) {
-    echo "User can edit or delete posts";
+    echo "L'utilisateur peut éditer ou supprimer des posts";
 }
 ```
 
-### Implementation in User Entity
+### Implémentation dans l'entité User
 
 ```php
 <?php
@@ -269,16 +269,16 @@ class User implements UserInterface
     #[Column(type: 'string', length: 50, nullable: true)]
     public ?string $role = null; // 'admin', 'user', 'moderator', etc.
     
-    // Roles (can be a string or an array)
+    // Rôles (peut être un string ou un array)
     public function getAuthRoles(): array|string
     {
         return $this->role ?? 'user';
     }
     
-    // Permissions (returns an array)
+    // Permissions (retourne un array)
     public function getAuthPermissions(): array
     {
-        // Example: permissions based on role
+        // Exemple : permissions basées sur le rôle
         return match($this->role) {
             'admin' => ['edit-posts', 'delete-posts', 'manage-users'],
             'moderator' => ['edit-posts', 'delete-posts'],
@@ -293,7 +293,7 @@ class User implements UserInterface
 
 ### AuthMiddleware
 
-Protects a route by requiring authentication.
+Protège une route en exigeant une authentification.
 
 ```php
 use JulienLinard\Auth\Middleware\AuthMiddleware;
@@ -302,7 +302,7 @@ use JulienLinard\Router\Router;
 $router = new Router();
 $auth = new AuthManager($authConfig);
 
-// Protected route with AuthMiddleware
+// Route protégée avec AuthMiddleware
 class DashboardController
 {
     #[Route(
@@ -320,12 +320,12 @@ class DashboardController
 
 ### RoleMiddleware
 
-Protects a route by requiring a specific role.
+Protège une route en exigeant un rôle spécifique.
 
 ```php
 use JulienLinard\Auth\Middleware\RoleMiddleware;
 
-// Route protected by role
+// Route protégée par rôle
 class AdminController
 {
     #[Route(
@@ -343,7 +343,7 @@ class AdminController
     }
 }
 
-// With multiple accepted roles
+// Avec plusieurs rôles acceptés
 #[Route(
     path: '/moderate',
     methods: ['GET'],
@@ -356,12 +356,12 @@ class AdminController
 
 ### PermissionMiddleware
 
-Protects a route by requiring a specific permission.
+Protège une route en exigeant une permission spécifique.
 
 ```php
 use JulienLinard\Auth\Middleware\PermissionMiddleware;
 
-// Route protected by permission
+// Route protégée par permission
 class PostController
 {
     #[Route(
@@ -374,12 +374,12 @@ class PostController
     )]
     public function update(Request $request): Response
     {
-        // User has 'edit-posts' permission
-        return Response::json(['message' => 'Post updated']);
+        // L'utilisateur a la permission 'edit-posts'
+        return Response::json(['message' => 'Post mis à jour']);
     }
 }
 
-// With multiple accepted permissions
+// Avec plusieurs permissions acceptées
 #[Route(
     path: '/posts/{id}/delete',
     methods: ['DELETE'],
@@ -392,7 +392,7 @@ class PostController
 
 ### GuestMiddleware
 
-Protects a route by requiring that no user is authenticated (for login/registration pages).
+Protège une route en exigeant qu'aucun utilisateur ne soit authentifié (pour les pages de connexion/inscription).
 
 ```php
 use JulienLinard\Auth\Middleware\GuestMiddleware;
@@ -406,13 +406,13 @@ class AuthController
     )]
     public function loginForm(): Response
     {
-        // Only unauthenticated users can access
+        // Seuls les utilisateurs non authentifiés peuvent accéder
         return new Response(200, '<form>...</form>');
     }
 }
 ```
 
-### Usage with Route Groups
+### Utilisation avec des groupes de routes
 
 ```php
 use JulienLinard\Router\Router;
@@ -420,12 +420,12 @@ use JulienLinard\Router\Router;
 $router = new Router();
 $auth = new AuthManager($authConfig);
 
-// Route group protected by authentication
+// Groupe de routes protégées par authentification
 $router->group('/dashboard', [new AuthMiddleware($auth)], function($router) {
     $router->registerRoutes(DashboardController::class);
 });
 
-// Route group protected by admin role
+// Groupe de routes protégées par rôle admin
 $router->group('/admin', [
     new AuthMiddleware($auth),
     new RoleMiddleware('admin', $auth)
@@ -433,7 +433,7 @@ $router->group('/admin', [
     $router->registerRoutes(AdminController::class);
 });
 
-// Route group protected by permission
+// Groupe de routes protégées par permission
 $router->group('/posts', [
     new AuthMiddleware($auth),
     new PermissionMiddleware('edit-posts', $auth)
@@ -444,9 +444,9 @@ $router->group('/posts', [
 
 ## 🔌 User Providers
 
-### DatabaseUserProvider (default)
+### DatabaseUserProvider (par défaut)
 
-Uses `doctrine-php` to retrieve users from the database.
+Utilise `doctrine-php` pour récupérer les utilisateurs depuis la base de données.
 
 ```php
 use JulienLinard\Auth\Providers\DatabaseUserProvider;
@@ -454,12 +454,12 @@ use JulienLinard\Doctrine\EntityManager;
 
 $em = new EntityManager($dbConfig);
 
-// Manual creation (optional, created automatically by default)
+// Création manuelle (optionnel, créé automatiquement par défaut)
 $provider = new DatabaseUserProvider(
     $em,
     User::class,
-    'id',        // Identifier field
-    'email'      // Credential field
+    'id',        // Champ identifiant
+    'email'      // Champ credential
 );
 
 $authConfig = [
@@ -469,9 +469,9 @@ $authConfig = [
 ];
 ```
 
-### Custom User Provider
+### User Provider personnalisé
 
-Create your own provider by implementing `UserProviderInterface`.
+Créez votre propre provider en implémentant `UserProviderInterface`.
 
 ```php
 <?php
@@ -483,7 +483,7 @@ class ApiUserProvider implements UserProviderInterface
 {
     public function findById(int|string $identifier): ?UserInterface
     {
-        // Retrieve from external API
+        // Récupérer depuis une API externe
         $response = file_get_contents("https://api.example.com/users/{$identifier}");
         $data = json_decode($response, true);
         
@@ -496,7 +496,7 @@ class ApiUserProvider implements UserProviderInterface
     
     public function findByCredentials(array $credentials): ?UserInterface
     {
-        // Retrieve from external API with credentials
+        // Récupérer depuis une API externe avec credentials
         $email = $credentials['email'] ?? null;
         if (!$email) {
             return null;
@@ -513,7 +513,7 @@ class ApiUserProvider implements UserProviderInterface
     }
 }
 
-// Usage
+// Utilisation
 $authConfig = [
     'user_class' => User::class,
     'provider' => new ApiUserProvider()
@@ -522,9 +522,9 @@ $authConfig = [
 
 ## 🛡️ Guards
 
-### SessionGuard (default)
+### SessionGuard (par défaut)
 
-Uses PHP sessions to store authentication state.
+Utilise les sessions PHP pour stocker l'état d'authentification.
 
 ```php
 use JulienLinard\Auth\Guards\SessionGuard;
@@ -536,13 +536,13 @@ $hasher = new PasswordHasher(PASSWORD_BCRYPT);
 
 $guard = new SessionGuard($provider, $hasher, 'auth_user');
 
-// The guard is created automatically by AuthManager
-// But you can customize it if needed
+// Le guard est créé automatiquement par AuthManager
+// Mais vous pouvez le personnaliser si nécessaire
 ```
 
-### Custom Guard
+### Guard personnalisé
 
-Create your own guard by implementing `GuardInterface`.
+Créez votre propre guard en implémentant `GuardInterface`.
 
 ```php
 <?php
@@ -575,7 +575,7 @@ class JwtGuard implements GuardInterface
             return false;
         }
         
-        // Create a JWT token instead of using session
+        // Créer un token JWT au lieu d'utiliser la session
         $token = $this->createJwtToken($user);
         setcookie('auth_token', $token, time() + 3600);
         
@@ -608,42 +608,42 @@ class JwtGuard implements GuardInterface
         return $this->userProvider->findById($userId);
     }
     
-    // ... other methods required by GuardInterface
+    // ... autres méthodes requises par GuardInterface
 }
 ```
 
 ## 🔒 Hashers
 
-### PasswordHasher (default)
+### PasswordHasher (par défaut)
 
-Uses native PHP hash functions.
+Utilise les fonctions de hash PHP natives.
 
 ```php
 use JulienLinard\Auth\Hashers\PasswordHasher;
 
-// With default algorithm (BCRYPT)
+// Avec algorithme par défaut (BCRYPT)
 $hasher = new PasswordHasher();
 
-// With specific algorithm
+// Avec algorithme spécifique
 $hasher = new PasswordHasher(PASSWORD_ARGON2ID);
 
-// With custom options
+// Avec options personnalisées
 $hasher = new PasswordHasher(PASSWORD_ARGON2ID, [
     'memory_cost' => 65536,
     'time_cost' => 4,
     'threads' => 3
 ]);
 
-// Usage
+// Utilisation
 $password = 'password123';
 $hash = $hasher->hash($password);
 $isValid = $hasher->verify($password, $hash);
 $needsRehash = $hasher->needsRehash($hash);
 ```
 
-### Custom Hasher
+### Hasher personnalisé
 
-Create your own hasher by implementing `HasherInterface`.
+Créez votre propre hasher en implémentant `HasherInterface`.
 
 ```php
 <?php
@@ -654,7 +654,7 @@ class CustomHasher implements HasherInterface
 {
     public function hash(string $password): string
     {
-        // Your custom hash logic
+        // Votre logique de hash personnalisée
         return hash('sha256', $password . 'salt');
     }
     
@@ -665,12 +665,12 @@ class CustomHasher implements HasherInterface
     
     public function needsRehash(string $hash): bool
     {
-        // Your logic to determine if rehash is needed
+        // Votre logique pour déterminer si un rehash est nécessaire
         return false;
     }
 }
 
-// Usage
+// Utilisation
 $authConfig = [
     'user_class' => User::class,
     'entity_manager' => $em,
@@ -678,9 +678,9 @@ $authConfig = [
 ];
 ```
 
-## 🔗 Integration with Other Packages
+## 🔗 Intégration avec les autres packages
 
-### Integration with core-php
+### Intégration avec core-php
 
 ```php
 <?php
@@ -689,11 +689,11 @@ use JulienLinard\Core\Application;
 use JulienLinard\Doctrine\EntityManager;
 use JulienLinard\Auth\AuthManager;
 
-// Initialize the application
+// Initialiser l'application
 $app = Application::create(__DIR__);
 $app->loadEnv();
 
-// Configure database
+// Configurer la base de données
 $em = new EntityManager([
     'host' => $_ENV['DB_HOST'],
     'dbname' => $_ENV['DB_NAME'],
@@ -701,13 +701,13 @@ $em = new EntityManager([
     'password' => $_ENV['DB_PASS']
 ]);
 
-// Configure authentication
+// Configurer l'authentification
 $auth = new AuthManager([
     'user_class' => User::class,
     'entity_manager' => $em
 ]);
 
-// Use in a controller
+// Utiliser dans un contrôleur
 class HomeController extends \JulienLinard\Core\Controller\Controller
 {
     public function index(AuthManager $auth)
@@ -722,7 +722,7 @@ class HomeController extends \JulienLinard\Core\Controller\Controller
 }
 ```
 
-### Integration with doctrine-php
+### Intégration avec doctrine-php
 
 ```php
 <?php
@@ -734,7 +734,7 @@ use JulienLinard\Doctrine\Mapping\Id;
 use JulienLinard\Auth\Models\UserInterface;
 use JulienLinard\Auth\Models\Authenticatable;
 
-// Define the User entity
+// Définir l'entité User
 #[Entity(table: 'users')]
 class User implements UserInterface
 {
@@ -750,10 +750,10 @@ class User implements UserInterface
     #[Column(type: 'string', length: 255)]
     public string $password;
     
-    // ... other properties
+    // ... autres propriétés
 }
 
-// Use with AuthManager
+// Utiliser avec AuthManager
 $em = new EntityManager($dbConfig);
 $auth = new AuthManager([
     'user_class' => User::class,
@@ -761,7 +761,7 @@ $auth = new AuthManager([
 ]);
 ```
 
-### Integration with php-router
+### Intégration avec php-router
 
 ```php
 <?php
@@ -775,17 +775,17 @@ use JulienLinard\Auth\Middleware\RoleMiddleware;
 $router = new Router();
 $auth = new AuthManager($authConfig);
 
-// Public routes
+// Routes publiques
 class HomeController
 {
     #[Route(path: '/', methods: ['GET'], name: 'home')]
     public function index(): Response
     {
-        return new Response(200, '<h1>Home</h1>');
+        return new Response(200, '<h1>Accueil</h1>');
     }
 }
 
-// Protected routes
+// Routes protégées
 class DashboardController
 {
     #[Route(
@@ -800,7 +800,7 @@ class DashboardController
     }
 }
 
-// Routes with roles
+// Routes avec rôles
 class AdminController
 {
     #[Route(
@@ -818,7 +818,7 @@ class AdminController
     }
 }
 
-// Register routes
+// Enregistrer les routes
 $router->registerRoutes(HomeController::class);
 $router->registerRoutes(DashboardController::class);
 $router->registerRoutes(AdminController::class);
@@ -830,7 +830,7 @@ $router->registerRoutes(AdminController::class);
 
 #### `__construct(array $config)`
 
-Creates a new AuthManager instance.
+Crée une nouvelle instance d'AuthManager.
 
 ```php
 $auth = new AuthManager([
@@ -841,7 +841,7 @@ $auth = new AuthManager([
 
 #### `attempt(array $credentials, bool $remember = false): bool`
 
-Attempts to authenticate a user with credentials.
+Tente d'authentifier un utilisateur avec des credentials.
 
 ```php
 $success = $auth->attempt([
@@ -852,7 +852,7 @@ $success = $auth->attempt([
 
 #### `login(UserInterface $user, bool $remember = false): void`
 
-Authenticates a user directly without password verification.
+Authentifie un utilisateur directement sans vérification de mot de passe.
 
 ```php
 $user = $em->getRepository(User::class)->find(1);
@@ -861,7 +861,7 @@ $auth->login($user, true);
 
 #### `logout(): void`
 
-Logs out the current user.
+Déconnecte l'utilisateur actuel.
 
 ```php
 $auth->logout();
@@ -869,27 +869,27 @@ $auth->logout();
 
 #### `check(): bool`
 
-Checks if a user is authenticated.
+Vérifie si un utilisateur est authentifié.
 
 ```php
 if ($auth->check()) {
-    // User authenticated
+    // Utilisateur authentifié
 }
 ```
 
 #### `guest(): bool`
 
-Checks if no user is authenticated.
+Vérifie si aucun utilisateur n'est authentifié.
 
 ```php
 if ($auth->guest()) {
-    // No user authenticated
+    // Aucun utilisateur authentifié
 }
 ```
 
 #### `user(): ?UserInterface`
 
-Returns the currently authenticated user.
+Retourne l'utilisateur actuellement authentifié.
 
 ```php
 $user = $auth->user();
@@ -900,7 +900,7 @@ if ($user) {
 
 #### `id(): int|string|null`
 
-Returns the ID of the currently authenticated user.
+Retourne l'ID de l'utilisateur actuellement authentifié.
 
 ```php
 $userId = $auth->id();
@@ -908,35 +908,35 @@ $userId = $auth->id();
 
 #### `hasRole(string $role): bool`
 
-Checks if the user has a specific role.
+Vérifie si l'utilisateur a un rôle spécifique.
 
 ```php
 if ($auth->hasRole('admin')) {
-    // User is admin
+    // L'utilisateur est admin
 }
 ```
 
 #### `can(string $permission): bool`
 
-Checks if the user has a specific permission.
+Vérifie si l'utilisateur a une permission spécifique.
 
 ```php
 if ($auth->can('edit-posts')) {
-    // User can edit posts
+    // L'utilisateur peut éditer des posts
 }
 ```
 
 #### `guard(): GuardInterface`
 
-Returns the current guard.
+Retourne le guard actuel.
 
 ```php
 $guard = $auth->guard();
 ```
 
-## 💡 Complete Examples
+## 💡 Exemples complets
 
-### Example 1: Complete Application with Authentication
+### Exemple 1 : Application complète avec authentification
 
 ```php
 <?php
@@ -953,11 +953,11 @@ use JulienLinard\Router\Attributes\Route;
 use JulienLinard\Router\Request;
 use JulienLinard\Router\Response;
 
-// Initialize the application
+// Initialiser l'application
 $app = Application::create(__DIR__);
 $app->loadEnv();
 
-// Configure database
+// Configurer la base de données
 $em = new EntityManager([
     'host' => $_ENV['DB_HOST'],
     'dbname' => $_ENV['DB_NAME'],
@@ -965,13 +965,13 @@ $em = new EntityManager([
     'password' => $_ENV['DB_PASS']
 ]);
 
-// Configure authentication
+// Configurer l'authentification
 $auth = new AuthManager([
     'user_class' => User::class,
     'entity_manager' => $em
 ]);
 
-// Authentication controller
+// Contrôleur d'authentification
 class AuthController
 {
     public function __construct(
@@ -997,7 +997,7 @@ class AuthController
             return new Response(302, '', ['Location' => '/dashboard']);
         }
         
-        return new Response(200, 'Invalid credentials');
+        return new Response(200, 'Identifiants incorrects');
     }
     
     #[Route(path: '/logout', methods: ['POST'], name: 'logout')]
@@ -1008,7 +1008,7 @@ class AuthController
     }
 }
 
-// Dashboard controller
+// Contrôleur dashboard
 class DashboardController
 {
     public function __construct(private AuthManager $auth) {}
@@ -1022,11 +1022,11 @@ class DashboardController
     public function index(): Response
     {
         $user = $this->auth->user();
-        return new Response(200, "<h1>Welcome {$user->firstname}</h1>");
+        return new Response(200, "<h1>Bienvenue {$user->firstname}</h1>");
     }
 }
 
-// Admin controller
+// Contrôleur admin
 class AdminController
 {
     public function __construct(private AuthManager $auth) {}
@@ -1042,17 +1042,17 @@ class AdminController
     )]
     public function index(): Response
     {
-        return new Response(200, '<h1>Admin Panel</h1>');
+        return new Response(200, '<h1>Panel Admin</h1>');
     }
 }
 
-// Register routes
+// Enregistrer les routes
 $router = $app->getRouter();
 $router->registerRoutes(AuthController::class);
 $router->registerRoutes(DashboardController::class);
 $router->registerRoutes(AdminController::class);
 
-// Start the application
+// Démarrer l'application
 $app->start();
 ```
 
@@ -1064,20 +1064,20 @@ composer test
 
 ## 📝 License
 
-MIT License - See the LICENSE file for more details.
+MIT License - Voir le fichier LICENSE pour plus de détails.
 
-## 🤝 Contributing
+## 🤝 Contribution
 
-Contributions are welcome! Feel free to open an issue or a pull request.
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
 
 ## 📧 Support
 
-For any questions or issues, please open an issue on GitHub.
+Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
 
-## 💝 Support the project
+## 💝 Soutenir le projet
 
-If this bundle is useful to you, consider [becoming a sponsor](https://github.com/sponsors/julien-lin) to support the development and maintenance of this open source project.
+Si ce bundle vous est utile, envisagez de [devenir un sponsor](https://github.com/sponsors/julien-lin) pour soutenir le développement et la maintenance de ce projet open source.
 
 ---
 
-**Developed with ❤️ by Julien Linard**
+**Développé avec ❤️ par Julien Linard**
