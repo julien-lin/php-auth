@@ -41,11 +41,10 @@ class RoleMiddleware implements Middleware
     /**
      * Traite la requête
      */
-    public function handle(Request $request): void
+    public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
-            Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401)->send();
-            exit;
+            return Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401);
         }
 
         $hasRole = false;
@@ -57,12 +56,13 @@ class RoleMiddleware implements Middleware
         }
 
         if (!$hasRole) {
-            Response::json([
+            return Response::json([
                 'error' => 'Forbidden',
                 'message' => 'Vous n\'avez pas les permissions nécessaires.'
-            ], 403)->send();
-            exit;
+            ], 403);
         }
+        
+        return null; // Continuer l'exécution
     }
 }
 
