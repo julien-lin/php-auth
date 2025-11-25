@@ -40,12 +40,13 @@ class AuthMiddleware implements Middleware
     /**
      * Traite la requête
      */
-    public function handle(Request $request): void
+    public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
-            Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401)->send();
-            exit;
+            return Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401);
         }
+        
+        return null; // Continuer l'exécution
     }
 }
 

@@ -38,15 +38,16 @@ class GuestMiddleware implements Middleware
     /**
      * Traite la requête
      */
-    public function handle(Request $request): void
+    public function handle(Request $request): ?Response
     {
         if ($this->auth->check()) {
-            Response::json([
+            return Response::json([
                 'error' => 'Forbidden',
                 'message' => 'Cette route est réservée aux utilisateurs non authentifiés.'
-            ], 403)->send();
-            exit;
+            ], 403);
         }
+        
+        return null; // Continuer l'exécution
     }
 }
 
