@@ -6,6 +6,7 @@ use JulienLinard\Router\Middleware;
 use JulienLinard\Router\Request;
 use JulienLinard\Router\Response;
 use JulienLinard\Auth\AuthManager;
+use JulienLinard\Core\Application;
 
 /**
  * Middleware pour vérifier l'authentification
@@ -17,24 +18,27 @@ class AuthMiddleware implements Middleware
     /**
      * Constructeur
      *
-     * @param AuthManager|null $auth Instance d'AuthManager (optionnel, sera créée si null)
+     * @param AuthManager|null $auth Instance d'AuthManager (optionnel, sera récupérée depuis le container si null)
      */
     public function __construct(?AuthManager $auth = null)
     {
-        // TODO: Récupérer depuis le container si disponible
-        $this->auth = $auth ?? $this->createAuthManager();
+        $this->auth = $auth ?? $this->getAuthManagerFromContainer();
     }
 
     /**
-     * Crée une instance d'AuthManager (méthode temporaire)
+     * Récupère AuthManager depuis le container
      */
-    private function createAuthManager(): AuthManager
+    private function getAuthManagerFromContainer(): AuthManager
     {
-        // Cette méthode devrait récupérer la config depuis le container
-        // Pour l'instant, on lève une exception
-        throw new \RuntimeException(
-            'AuthManager doit être fourni au constructeur ou disponible dans le container.'
-        );
+        try {
+            $app = Application::getInstanceOrFail();
+            $container = $app->getContainer();
+            return $container->make(AuthManager::class);
+        } catch (\Exception $e) {
+            throw new \RuntimeException(
+                'AuthManager doit être fourni au constructeur ou disponible dans le container. ' . $e->getMessage()
+            );
+        }
     }
 
     /**
@@ -43,7 +47,18 @@ class AuthMiddleware implements Middleware
     public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
-            return Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401);
+            // Pour les requêtes GET (pages web) → rediriger vers la page de connexion
+            if ($request->getMethod() === 'GET') {
+                $response = new Response(302);
+                $response->setHeader('Location', '/login');
+                return $response;
+            }
+            
+            // Pour les requêtes POST/AJAX → retourner une erreur JSON
+            return Response::json([
+                'error' => 'Unauthorized',
+                'message' => 'Vous devez être authentifié.'
+            ], 401);
         }
         
         return null; // Continuer l'exécution
