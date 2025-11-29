@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JulienLinard\Auth\Providers;
 
 use JulienLinard\Doctrine\EntityManager;
@@ -64,6 +66,10 @@ class DatabaseUserProvider implements UserProviderInterface
 
     /**
      * Retourne un utilisateur par un champ spécifique
+     * 
+     * @param string $field Nom du champ
+     * @param mixed $value Valeur
+     * @return UserInterface|null Utilisateur ou null
      */
     public function findByField(string $field, mixed $value): ?UserInterface
     {
