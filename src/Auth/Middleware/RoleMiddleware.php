@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JulienLinard\Auth\Middleware;
 
 use JulienLinard\Router\Middleware;
@@ -24,18 +26,23 @@ class RoleMiddleware implements Middleware
     public function __construct(string|array $roles, ?AuthManager $auth = null)
     {
         $this->roles = is_array($roles) ? $roles : [$roles];
-        // TODO: Récupérer depuis le container si disponible
         $this->auth = $auth ?? $this->createAuthManager();
     }
 
     /**
-     * Crée une instance d'AuthManager (méthode temporaire)
+     * Crée une instance d'AuthManager depuis le container
      */
     private function createAuthManager(): AuthManager
     {
-        throw new \RuntimeException(
-            'AuthManager doit être fourni au constructeur ou disponible dans le container.'
-        );
+        try {
+            $app = \JulienLinard\Core\Application::getInstanceOrFail();
+            $container = $app->getContainer();
+            return $container->make(AuthManager::class);
+        } catch (\Exception $e) {
+            throw new \RuntimeException(
+                'AuthManager doit être fourni au constructeur ou disponible dans le container. ' . $e->getMessage()
+            );
+        }
     }
 
     /**

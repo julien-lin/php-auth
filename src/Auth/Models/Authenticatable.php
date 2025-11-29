@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JulienLinard\Auth\Models;
 
 /**
@@ -28,7 +30,18 @@ trait Authenticatable
      */
     public function getAuthRoles(): array|string
     {
-        return $this->roles ?? [];
+        // Si roles (array) est défini, le retourner
+        if (isset($this->roles) && is_array($this->roles)) {
+            return $this->roles;
+        }
+        
+        // Sinon, si role (string) est défini, le retourner
+        if (isset($this->role) && is_string($this->role)) {
+            return $this->role;
+        }
+        
+        // Par défaut, retourner un tableau vide
+        return [];
     }
 
     /**
