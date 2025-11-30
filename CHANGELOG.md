@@ -5,6 +5,33 @@ Tous les changements notables de ce projet seront documentés dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.2.0] - 2025-01-XX
+
+### ✨ Ajouté
+
+- **Redirections configurables dans les middlewares** : Ajout de paramètres de redirection personnalisables
+  - `AuthMiddleware` : Paramètre `$redirectTo` (défaut: `'/login'`) pour personnaliser la redirection si l'utilisateur n'est pas authentifié
+  - `GuestMiddleware` : Paramètre `$redirectTo` (défaut: `'/'`) pour personnaliser la redirection si l'utilisateur est déjà authentifié
+  - `RoleMiddleware` : Paramètre `$redirectTo` (défaut: `null`) pour rediriger les utilisateurs sans le rôle requis (pour les requêtes GET)
+  - `PermissionMiddleware` : Paramètre `$redirectTo` (défaut: `null`) pour rediriger les utilisateurs sans la permission requise (pour les requêtes GET)
+
+### 🔧 Amélioré
+
+- **Middlewares** : Amélioration du comportement des redirections
+  - Redirection automatique pour les requêtes GET vers la route configurée
+  - Retour d'erreur JSON pour les requêtes POST/AJAX (comportement inchangé)
+  - Support de `null` pour désactiver les redirections et retourner uniquement des erreurs JSON
+
+- **Documentation** : Mise à jour complète des README (anglais et français)
+  - Documentation des nouveaux paramètres de redirection
+  - Exemples d'utilisation avec redirections personnalisées
+  - Exemples mis à jour pour les groupes de routes
+
+### 📝 Documentation
+
+- Ajout d'exemples détaillés pour chaque middleware avec les nouveaux paramètres
+- Documentation des valeurs par défaut et du comportement selon le type de requête
+
 ## [1.1.0] - 2025-11-29
 
 ### ✨ Ajouté

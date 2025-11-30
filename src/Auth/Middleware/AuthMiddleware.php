@@ -16,14 +16,17 @@ use JulienLinard\Core\Application;
 class AuthMiddleware implements Middleware
 {
     private AuthManager $auth;
+    private ?string $redirectTo;
 
     /**
      * Constructeur
      *
+     * @param string|null $redirectTo Route de redirection si l'utilisateur n'est pas authentifié (par défaut: '/login')
      * @param AuthManager|null $auth Instance d'AuthManager (optionnel, sera récupérée depuis le container si null)
      */
-    public function __construct(?AuthManager $auth = null)
+    public function __construct(?string $redirectTo = '/login', ?AuthManager $auth = null)
     {
+        $this->redirectTo = $redirectTo;
         $this->auth = $auth ?? $this->getAuthManagerFromContainer();
     }
 
@@ -49,10 +52,10 @@ class AuthMiddleware implements Middleware
     public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
-            // Pour les requêtes GET (pages web) → rediriger vers la page de connexion
-            if ($request->getMethod() === 'GET') {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
                 $response = new Response(302);
-                $response->setHeader('Location', '/login');
+                $response->setHeader('Location', $this->redirectTo);
                 return $response;
             }
             

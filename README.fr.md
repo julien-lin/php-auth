@@ -309,21 +309,40 @@ use JulienLinard\Router\Router;
 $router = new Router();
 $auth = new AuthManager($authConfig);
 
-// Route protégée avec AuthMiddleware
+// Route protégée avec AuthMiddleware (redirection par défaut vers '/login')
 class DashboardController
 {
     #[Route(
         path: '/dashboard',
         methods: ['GET'],
         name: 'dashboard',
-        middleware: [new AuthMiddleware($auth)]
+        middleware: [new AuthMiddleware()]
     )]
     public function index(): Response
     {
         return new Response(200, '<h1>Dashboard</h1>');
     }
 }
+
+// Avec une route de redirection personnalisée
+#[Route(
+    path: '/dashboard',
+    methods: ['GET'],
+    middleware: [new AuthMiddleware('/connexion')]
+)]
+
+// L'AuthManager est automatiquement récupéré depuis le container si non fourni
+// Vous pouvez aussi le passer explicitement :
+#[Route(
+    path: '/dashboard',
+    methods: ['GET'],
+    middleware: [new AuthMiddleware('/login', $auth)]
+)]
 ```
+
+**Paramètres :**
+- `$redirectTo` (optionnel, par défaut: `'/login'`): Route de redirection si l'utilisateur n'est pas authentifié (pour les requêtes GET)
+- `$auth` (optionnel): Instance d'AuthManager (récupérée automatiquement depuis le container si non fournie)
 
 ### RoleMiddleware
 
@@ -332,7 +351,7 @@ Protège une route en exigeant un rôle spécifique.
 ```php
 use JulienLinard\Auth\Middleware\RoleMiddleware;
 
-// Route protégée par rôle
+// Route protégée par rôle (par défaut: retourne une erreur JSON si non autorisé)
 class AdminController
 {
     #[Route(
@@ -340,8 +359,8 @@ class AdminController
         methods: ['GET'],
         name: 'admin.users',
         middleware: [
-            new AuthMiddleware($auth),
-            new RoleMiddleware('admin', $auth)
+            new AuthMiddleware(),
+            new RoleMiddleware('admin')
         ]
     )]
     public function users(): Response
@@ -355,11 +374,26 @@ class AdminController
     path: '/moderate',
     methods: ['GET'],
     middleware: [
-        new AuthMiddleware($auth),
-        new RoleMiddleware(['admin', 'moderator'], $auth)
+        new AuthMiddleware(),
+        new RoleMiddleware(['admin', 'moderator'])
+    ]
+)]
+
+// Avec une route de redirection personnalisée (pour les requêtes GET)
+#[Route(
+    path: '/admin',
+    methods: ['GET'],
+    middleware: [
+        new AuthMiddleware(),
+        new RoleMiddleware('admin', '/unauthorized')
     ]
 )]
 ```
+
+**Paramètres :**
+- `$roles` (requis): Rôle(s) requis (string ou array)
+- `$redirectTo` (optionnel, par défaut: `null`): Route de redirection si l'utilisateur n'a pas le rôle (pour les requêtes GET). Si `null`, retourne une erreur JSON
+- `$auth` (optionnel): Instance d'AuthManager (récupérée automatiquement depuis le container si non fournie)
 
 ### PermissionMiddleware
 
@@ -368,15 +402,15 @@ Protège une route en exigeant une permission spécifique.
 ```php
 use JulienLinard\Auth\Middleware\PermissionMiddleware;
 
-// Route protégée par permission
+// Route protégée par permission (par défaut: retourne une erreur JSON si non autorisé)
 class PostController
 {
     #[Route(
         path: '/posts/{id}/edit',
         methods: ['POST'],
         middleware: [
-            new AuthMiddleware($auth),
-            new PermissionMiddleware('edit-posts', $auth)
+            new AuthMiddleware(),
+            new PermissionMiddleware('edit-posts')
         ]
     )]
     public function update(Request $request): Response
@@ -391,11 +425,26 @@ class PostController
     path: '/posts/{id}/delete',
     methods: ['DELETE'],
     middleware: [
-        new AuthMiddleware($auth),
-        new PermissionMiddleware(['delete-posts', 'manage-posts'], $auth)
+        new AuthMiddleware(),
+        new PermissionMiddleware(['delete-posts', 'manage-posts'])
+    ]
+)]
+
+// Avec une route de redirection personnalisée (pour les requêtes GET)
+#[Route(
+    path: '/posts/{id}/edit',
+    methods: ['GET'],
+    middleware: [
+        new AuthMiddleware(),
+        new PermissionMiddleware('edit-posts', '/forbidden')
     ]
 )]
 ```
+
+**Paramètres :**
+- `$permissions` (requis): Permission(s) requise(s) (string ou array)
+- `$redirectTo` (optionnel, par défaut: `null`): Route de redirection si l'utilisateur n'a pas la permission (pour les requêtes GET). Si `null`, retourne une erreur JSON
+- `$auth` (optionnel): Instance d'AuthManager (récupérée automatiquement depuis le container si non fournie)
 
 ### GuestMiddleware
 
@@ -406,18 +455,35 @@ use JulienLinard\Auth\Middleware\GuestMiddleware;
 
 class AuthController
 {
+    // Redirection par défaut vers '/' si l'utilisateur est déjà authentifié
     #[Route(
         path: '/login',
         methods: ['GET'],
-        middleware: [new GuestMiddleware($auth)]
+        middleware: [new GuestMiddleware()]
     )]
     public function loginForm(): Response
     {
         // Seuls les utilisateurs non authentifiés peuvent accéder
         return new Response(200, '<form>...</form>');
     }
+    
+    // Avec une route de redirection personnalisée
+    #[Route(
+        path: '/register',
+        methods: ['GET'],
+        middleware: [new GuestMiddleware('/dashboard')]
+    )]
+    public function registerForm(): Response
+    {
+        // Si l'utilisateur est authentifié, rediriger vers '/dashboard'
+        return new Response(200, '<form>...</form>');
+    }
 }
 ```
+
+**Paramètres :**
+- `$redirectTo` (optionnel, par défaut: `'/'`): Route de redirection si l'utilisateur est déjà authentifié (pour les requêtes GET)
+- `$auth` (optionnel): Instance d'AuthManager (récupérée automatiquement depuis le container si non fournie)
 
 ### Utilisation avec des groupes de routes
 
@@ -428,22 +494,22 @@ $router = new Router();
 $auth = new AuthManager($authConfig);
 
 // Groupe de routes protégées par authentification
-$router->group('/dashboard', [new AuthMiddleware($auth)], function($router) {
+$router->group('/dashboard', [new AuthMiddleware()], function($router) {
     $router->registerRoutes(DashboardController::class);
 });
 
-// Groupe de routes protégées par rôle admin
+// Groupe de routes protégées par rôle admin avec redirection personnalisée
 $router->group('/admin', [
-    new AuthMiddleware($auth),
-    new RoleMiddleware('admin', $auth)
+    new AuthMiddleware(),
+    new RoleMiddleware('admin', '/unauthorized')
 ], function($router) {
     $router->registerRoutes(AdminController::class);
 });
 
-// Groupe de routes protégées par permission
+// Groupe de routes protégées par permission avec redirection personnalisée
 $router->group('/posts', [
-    new AuthMiddleware($auth),
-    new PermissionMiddleware('edit-posts', $auth)
+    new AuthMiddleware(),
+    new PermissionMiddleware('edit-posts', '/forbidden')
 ], function($router) {
     $router->registerRoutes(PostController::class);
 });

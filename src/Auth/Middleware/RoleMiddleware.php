@@ -16,16 +16,19 @@ class RoleMiddleware implements Middleware
 {
     private AuthManager $auth;
     private string|array $roles;
+    private ?string $redirectTo;
 
     /**
      * Constructeur
      *
      * @param string|array $roles Rôle(s) requis
+     * @param string|null $redirectTo Route de redirection si l'utilisateur n'a pas le rôle (par défaut: null, retourne JSON)
      * @param AuthManager|null $auth Instance d'AuthManager (optionnel)
      */
-    public function __construct(string|array $roles, ?AuthManager $auth = null)
+    public function __construct(string|array $roles, ?string $redirectTo = null, ?AuthManager $auth = null)
     {
         $this->roles = is_array($roles) ? $roles : [$roles];
+        $this->redirectTo = $redirectTo;
         $this->auth = $auth ?? $this->createAuthManager();
     }
 
@@ -51,6 +54,13 @@ class RoleMiddleware implements Middleware
     public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée ou login par défaut
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
+                $response = new Response(302);
+                $response->setHeader('Location', $this->redirectTo);
+                return $response;
+            }
+            
             return Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401);
         }
 
@@ -63,6 +73,14 @@ class RoleMiddleware implements Middleware
         }
 
         if (!$hasRole) {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
+                $response = new Response(302);
+                $response->setHeader('Location', $this->redirectTo);
+                return $response;
+            }
+            
+            // Pour les requêtes POST/AJAX → retourner une erreur JSON
             return Response::json([
                 'error' => 'Forbidden',
                 'message' => 'Vous n\'avez pas les permissions nécessaires.'

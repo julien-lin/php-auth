@@ -16,16 +16,19 @@ class PermissionMiddleware implements Middleware
 {
     private AuthManager $auth;
     private string|array $permissions;
+    private ?string $redirectTo;
 
     /**
      * Constructeur
      *
      * @param string|array $permissions Permission(s) requise(s)
+     * @param string|null $redirectTo Route de redirection si l'utilisateur n'a pas la permission (par défaut: null, retourne JSON)
      * @param AuthManager|null $auth Instance d'AuthManager (optionnel)
      */
-    public function __construct(string|array $permissions, ?AuthManager $auth = null)
+    public function __construct(string|array $permissions, ?string $redirectTo = null, ?AuthManager $auth = null)
     {
         $this->permissions = is_array($permissions) ? $permissions : [$permissions];
+        $this->redirectTo = $redirectTo;
         $this->auth = $auth ?? $this->createAuthManager();
     }
 
@@ -51,6 +54,13 @@ class PermissionMiddleware implements Middleware
     public function handle(Request $request): ?Response
     {
         if (!$this->auth->check()) {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée ou login par défaut
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
+                $response = new Response(302);
+                $response->setHeader('Location', $this->redirectTo);
+                return $response;
+            }
+            
             return Response::json(['error' => 'Unauthorized', 'message' => 'Vous devez être authentifié.'], 401);
         }
 
@@ -63,6 +73,14 @@ class PermissionMiddleware implements Middleware
         }
 
         if (!$hasPermission) {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
+                $response = new Response(302);
+                $response->setHeader('Location', $this->redirectTo);
+                return $response;
+            }
+            
+            // Pour les requêtes POST/AJAX → retourner une erreur JSON
             return Response::json([
                 'error' => 'Forbidden',
                 'message' => 'Vous n\'avez pas les permissions nécessaires.'
