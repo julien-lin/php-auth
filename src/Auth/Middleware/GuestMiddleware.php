@@ -15,14 +15,17 @@ use JulienLinard\Auth\AuthManager;
 class GuestMiddleware implements Middleware
 {
     private AuthManager $auth;
+    private ?string $redirectTo;
 
     /**
      * Constructeur
      *
+     * @param string|null $redirectTo Route de redirection si l'utilisateur est authentifié (par défaut: '/')
      * @param AuthManager|null $auth Instance d'AuthManager (optionnel)
      */
-    public function __construct(?AuthManager $auth = null)
+    public function __construct(?string $redirectTo = '/', ?AuthManager $auth = null)
     {
+        $this->redirectTo = $redirectTo;
         $this->auth = $auth ?? $this->createAuthManager();
     }
 
@@ -48,6 +51,14 @@ class GuestMiddleware implements Middleware
     public function handle(Request $request): ?Response
     {
         if ($this->auth->check()) {
+            // Pour les requêtes GET (pages web) → rediriger vers la route configurée
+            if ($request->getMethod() === 'GET' && $this->redirectTo !== null) {
+                $response = new Response(302);
+                $response->setHeader('Location', $this->redirectTo);
+                return $response;
+            }
+            
+            // Pour les requêtes POST/AJAX → retourner une erreur JSON
             return Response::json([
                 'error' => 'Forbidden',
                 'message' => 'Cette route est réservée aux utilisateurs non authentifiés.'
