@@ -5,6 +5,56 @@ Tous les changements notables de ce projet seront documentés dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.3.0] - 2025-01-15
+
+### ✨ Ajouté
+
+- **Rehash automatique des mots de passe** : Détection et mise à jour automatique des mots de passe nécessitant un rehash
+  - Méthode `updatePassword()` dans `UserProviderInterface` et `DatabaseUserProvider`
+  - Rehash automatique lors de la connexion si l'algorithme est obsolète
+  - Support de la réflexion pour trouver automatiquement le champ password
+
+- **Système "Remember Me"** : Authentification persistante avec tokens sécurisés
+  - Classe `RememberToken` : Modèle pour les tokens
+  - Interface `RememberTokenManagerInterface` : Interface pour les gestionnaires de tokens
+  - `DatabaseRememberTokenManager` : Implémentation avec Doctrine EntityManager
+  - Intégration dans `SessionGuard` : Support complet des tokens persistants
+  - Cookies sécurisés : HttpOnly, Secure, SameSite=Strict
+  - Nettoyage automatique des tokens expirés
+
+- **Cache mémoire des utilisateurs** : Optimisation pour éviter les requêtes DB répétées
+  - Cache statique partagé entre toutes les instances de `SessionGuard`
+  - Durée d'une requête uniquement (pas de persistance)
+  - Méthodes `clearUserCache()` et `clearUserCacheFor()` pour la gestion manuelle
+
+- **Tests supplémentaires** : Augmentation de la couverture de tests
+  - `PasswordRehashTest` : Tests pour le rehash automatique
+  - `UserCacheTest` : Tests pour le cache mémoire
+  - Tests pour `updatePassword()` dans `DatabaseUserProviderTest`
+
+- **Documentation technique** : Documentation complète de l'architecture
+  - `DOCUMENTATION/ARCHITECTURE.md` : Architecture détaillée du module
+  - `migrations/remember_tokens.sql` : Migration SQL pour la table remember_tokens
+  - Diagrammes d'architecture et flux d'authentification
+
+### 🔧 Amélioré
+
+- **SessionGuard** : Amélioration de la gestion des utilisateurs
+  - Support optionnel de `RememberTokenManager` dans le constructeur
+  - Vérification automatique des tokens "Remember Me" lors de `user()`
+  - Nettoyage automatique du cache lors du logout
+
+- **DatabaseUserProvider** : Ajout de la méthode `updatePassword()`
+  - Utilisation de la réflexion pour trouver automatiquement le champ password
+  - Support de plusieurs noms de champs (password, hashedPassword, passwordHash)
+  - Validation de la classe utilisateur avant mise à jour
+
+### 📝 Documentation
+
+- Documentation technique complète dans `DOCUMENTATION/`
+- Exemples d'utilisation pour "Remember Me"
+- Guide de migration pour la table remember_tokens
+
 ## [1.2.0] - 2025-01-XX
 
 ### ✨ Ajouté

@@ -82,5 +82,55 @@ class DatabaseUserProvider implements UserProviderInterface
         
         return null;
     }
+
+    /**
+     * Met à jour le mot de passe hashé d'un utilisateur
+     * 
+     * Utilise la réflexion pour trouver et mettre à jour le champ password
+     * de l'entité utilisateur, puis persiste les changements via EntityManager.
+     *
+     * @param UserInterface $user Utilisateur
+     * @param string $hashedPassword Nouveau mot de passe hashé
+     * @return void
+     * @throws \RuntimeException Si le champ password n'est pas trouvé ou n'est pas modifiable
+     */
+    public function updatePassword(UserInterface $user, string $hashedPassword): void
+    {
+        // Vérifier que l'utilisateur est une instance de la classe attendue
+        if (!($user instanceof $this->userClass)) {
+            throw new \RuntimeException(
+                "L'utilisateur doit être une instance de {$this->userClass}"
+            );
+        }
+
+        // Utiliser la réflexion pour trouver le champ password
+        $reflection = new \ReflectionClass($user);
+        
+        // Chercher un champ nommé 'password' ou 'hashedPassword'
+        $passwordFields = ['password', 'hashedPassword', 'passwordHash'];
+        $passwordProperty = null;
+        
+        foreach ($passwordFields as $fieldName) {
+            if ($reflection->hasProperty($fieldName)) {
+                $passwordProperty = $reflection->getProperty($fieldName);
+                break;
+            }
+        }
+        
+        if ($passwordProperty === null) {
+            throw new \RuntimeException(
+                "Impossible de trouver le champ password dans {$this->userClass}. " .
+                "Champs recherchés: " . implode(', ', $passwordFields)
+            );
+        }
+        
+        // Rendre la propriété accessible et mettre à jour la valeur
+        $passwordProperty->setAccessible(true);
+        $passwordProperty->setValue($user, $hashedPassword);
+        
+        // Persister les changements via EntityManager
+        $this->em->persist($user);
+        $this->em->flush();
+    }
 }
 
