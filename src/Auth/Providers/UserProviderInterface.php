@@ -35,5 +35,14 @@ interface UserProviderInterface
      * @return UserInterface|null Utilisateur ou null
      */
     public function findByField(string $field, mixed $value): ?UserInterface;
+
+    /**
+     * Met à jour le mot de passe hashé d'un utilisateur
+     *
+     * @param UserInterface $user Utilisateur
+     * @param string $hashedPassword Nouveau mot de passe hashé
+     * @return void
+     */
+    public function updatePassword(UserInterface $user, string $hashedPassword): void;
 }
 

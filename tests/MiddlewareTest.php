@@ -28,7 +28,7 @@ class MiddlewareTest extends TestCase
     public function testAuthMiddlewareWithAuthenticatedUser()
     {
         $auth = $this->createMockAuthManager(true);
-        $middleware = new AuthMiddleware($auth);
+        $middleware = new AuthMiddleware('/login', $auth);
         $request = new Request('/test', 'GET');
         
         $response = $middleware->handle($request);
@@ -39,7 +39,7 @@ class MiddlewareTest extends TestCase
     public function testAuthMiddlewareWithUnauthenticatedUserGet()
     {
         $auth = $this->createMockAuthManager(false);
-        $middleware = new AuthMiddleware($auth);
+        $middleware = new AuthMiddleware('/login', $auth);
         $request = new Request('/test', 'GET');
         
         $response = $middleware->handle($request);
@@ -54,7 +54,7 @@ class MiddlewareTest extends TestCase
     public function testAuthMiddlewareWithUnauthenticatedUserPost()
     {
         $auth = $this->createMockAuthManager(false);
-        $middleware = new AuthMiddleware($auth);
+        $middleware = new AuthMiddleware('/login', $auth);
         $request = new Request('/api/test', 'POST');
         
         $response = $middleware->handle($request);
@@ -69,22 +69,22 @@ class MiddlewareTest extends TestCase
     public function testGuestMiddlewareWithAuthenticatedUser()
     {
         $auth = $this->createMockAuthManager(true);
-        $middleware = new GuestMiddleware($auth);
+        $middleware = new GuestMiddleware('/', $auth);
         $request = new Request('/login', 'GET');
         
         $response = $middleware->handle($request);
         
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertEquals(403, $response->getStatusCode());
-        $content = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('error', $content);
-        $this->assertEquals('Forbidden', $content['error']);
+        $this->assertEquals(302, $response->getStatusCode());
+        $headers = $response->getHeaders();
+        $this->assertArrayHasKey('location', $headers);
+        $this->assertEquals('/', $headers['location']);
     }
 
     public function testGuestMiddlewareWithGuest()
     {
         $auth = $this->createMockAuthManager(false);
-        $middleware = new GuestMiddleware($auth);
+        $middleware = new GuestMiddleware('/', $auth);
         $request = new Request('/login', 'GET');
         
         $response = $middleware->handle($request);
@@ -95,7 +95,7 @@ class MiddlewareTest extends TestCase
     public function testRoleMiddlewareWithCorrectRole()
     {
         $auth = $this->createMockAuthManager(true, true);
-        $middleware = new RoleMiddleware('admin', $auth);
+        $middleware = new RoleMiddleware('admin', null, $auth);
         $request = new Request('/admin', 'GET');
         
         $response = $middleware->handle($request);
@@ -106,7 +106,7 @@ class MiddlewareTest extends TestCase
     public function testRoleMiddlewareWithWrongRole()
     {
         $auth = $this->createMockAuthManager(true, false);
-        $middleware = new RoleMiddleware('admin', $auth);
+        $middleware = new RoleMiddleware('admin', null, $auth);
         $request = new Request('/admin', 'GET');
         
         $response = $middleware->handle($request);
@@ -121,7 +121,7 @@ class MiddlewareTest extends TestCase
     public function testRoleMiddlewareWithUnauthenticatedUser()
     {
         $auth = $this->createMockAuthManager(false);
-        $middleware = new RoleMiddleware('admin', $auth);
+        $middleware = new RoleMiddleware('admin', null, $auth);
         $request = new Request('/admin', 'GET');
         
         $response = $middleware->handle($request);
@@ -133,7 +133,7 @@ class MiddlewareTest extends TestCase
     public function testRoleMiddlewareWithMultipleRoles()
     {
         $auth = $this->createMockAuthManager(true, true);
-        $middleware = new RoleMiddleware(['admin', 'moderator'], $auth);
+        $middleware = new RoleMiddleware(['admin', 'moderator'], null, $auth);
         $request = new Request('/admin', 'GET');
         
         $response = $middleware->handle($request);
@@ -144,7 +144,7 @@ class MiddlewareTest extends TestCase
     public function testPermissionMiddlewareWithCorrectPermission()
     {
         $auth = $this->createMockAuthManager(true, false, true);
-        $middleware = new PermissionMiddleware('edit-posts', $auth);
+        $middleware = new PermissionMiddleware('edit-posts', null, $auth);
         $request = new Request('/posts/edit', 'GET');
         
         $response = $middleware->handle($request);
@@ -155,7 +155,7 @@ class MiddlewareTest extends TestCase
     public function testPermissionMiddlewareWithWrongPermission()
     {
         $auth = $this->createMockAuthManager(true, false, false);
-        $middleware = new PermissionMiddleware('edit-posts', $auth);
+        $middleware = new PermissionMiddleware('edit-posts', null, $auth);
         $request = new Request('/posts/edit', 'GET');
         
         $response = $middleware->handle($request);
@@ -170,7 +170,7 @@ class MiddlewareTest extends TestCase
     public function testPermissionMiddlewareWithUnauthenticatedUser()
     {
         $auth = $this->createMockAuthManager(false);
-        $middleware = new PermissionMiddleware('edit-posts', $auth);
+        $middleware = new PermissionMiddleware('edit-posts', null, $auth);
         $request = new Request('/posts/edit', 'GET');
         
         $response = $middleware->handle($request);
@@ -182,7 +182,7 @@ class MiddlewareTest extends TestCase
     public function testPermissionMiddlewareWithMultiplePermissions()
     {
         $auth = $this->createMockAuthManager(true, false, true);
-        $middleware = new PermissionMiddleware(['edit-posts', 'delete-posts'], $auth);
+        $middleware = new PermissionMiddleware(['edit-posts', 'delete-posts'], null, $auth);
         $request = new Request('/posts', 'GET');
         
         $response = $middleware->handle($request);

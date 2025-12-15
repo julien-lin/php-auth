@@ -252,6 +252,9 @@ class SessionGuardTest extends TestCase
         // Login pour créer la session
         $guard->login($user);
         
+        // Nettoyer le cache pour forcer le rechargement depuis le provider
+        SessionGuard::clearUserCache();
+        
         // Créer un nouveau guard avec provider qui ne trouve pas l'utilisateur
         $this->userProvider
             ->method('findById')

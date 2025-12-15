@@ -180,6 +180,44 @@ class DatabaseUserProviderTest extends TestCase
         
         $this->assertInstanceOf(UserInterface::class, $result);
     }
+
+    public function testUpdatePassword()
+    {
+        $em = $this->createMockEntityManager();
+        
+        // Créer un utilisateur réel avec propriété password
+        $user = new TestUser();
+        $user->password = 'old-hash';
+        
+        // Mock EntityManager pour persist et flush
+        $em->expects($this->once())
+            ->method('persist')
+            ->with($this->isInstanceOf(UserInterface::class));
+        
+        $em->expects($this->once())
+            ->method('flush');
+        
+        $provider = new DatabaseUserProvider($em, TestUser::class);
+        
+        $newHash = 'new-hashed-password';
+        $provider->updatePassword($user, $newHash);
+        
+        // Vérifier que le mot de passe a été mis à jour
+        $this->assertEquals($newHash, $user->getAuthPassword());
+    }
+
+    public function testUpdatePasswordThrowsExceptionIfUserClassMismatch()
+    {
+        $em = $this->createMockEntityManager();
+        $user = $this->createMockUser();
+        
+        $provider = new DatabaseUserProvider($em, 'DifferentUserClass');
+        
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('L\'utilisateur doit être une instance de DifferentUserClass');
+        
+        $provider->updatePassword($user, 'new-hash');
+    }
 }
 
 // Mock User class for testing (déjà défini dans AuthManagerTest.php)

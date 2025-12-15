@@ -6,4 +6,4 @@ composer.lock
 *.log
 .env
 .env.test
-
+/DOCUMENTATION/
