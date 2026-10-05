@@ -10,7 +10,7 @@ If this bundle is useful to you, consider [becoming a sponsor](https://github.co
 
 A complete and modern authentication system for PHP 8+ with user management, roles, permissions, customizable guards and integration with JulienLinard packages.
 
-**Current Version**: 1.1.0 | **Tests**: 64 tests, 133 assertions (100% passing) | **Strict Types**: ✅ Enabled
+**Current Version**: 1.3.1 | **Tests**: 72 tests, 154 assertions (100% passing) | **Strict Types**: ✅ Enabled
 
 ## 📋 Table of Contents
 
@@ -1131,7 +1131,7 @@ $app->start();
 
 ## 🧪 Tests
 
-The library includes a comprehensive test suite with **64 tests** and **133 assertions**, ensuring reliability and quality.
+The library includes a comprehensive test suite with **72 tests** and **154 assertions**, ensuring reliability and quality.
 
 ```bash
 composer test
@@ -1145,12 +1145,15 @@ composer test
 - ✅ **DatabaseUserProvider**: 8 tests (findById, findByCredentials, findByField)
 - ✅ **Middlewares**: 13 tests (AuthMiddleware, GuestMiddleware, RoleMiddleware, PermissionMiddleware)
 - ✅ **Roles and Permissions**: 10 tests (Authenticatable trait)
+- ✅ **Password Rehashing**: Automatic upgrade of outdated password hashes
+- ✅ **User Cache**: Request-scoped cache behavior and invalidation
+- ✅ **Remember Me**: Persistent token authentication and cleanup
 
-**Test Results**: 100% passing (64/64 tests)
+**Test Results**: 100% passing (72/72 tests)
 
 ### Code Quality
 
-- ✅ **Strict Types**: All 16 source files use `declare(strict_types=1)`
+- ✅ **Strict Types**: All 19 source files use `declare(strict_types=1)`
 - ✅ **Type Safety**: Enhanced type hints with PHP 8 union types and `mixed`
 - ✅ **PHP 8.5+ Compatible**: Full support for PHP 8.5+ features
 

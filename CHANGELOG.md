@@ -5,6 +5,13 @@ Tous les changements notables de ce projet seront documentés dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.3.1] - 2026-10-05
+
+### 📝 Documentation
+
+- Mise à jour des README avec la release courante et les statistiques de tests.
+- Suppression du champ `version` Composer géré par les tags Packagist.
+
 ## [1.3.0] - 2025-01-15
 
 ### ✨ Ajouté
